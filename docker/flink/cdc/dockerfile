@@ -1,0 +1,51 @@
+FROM alpine:3.22 AS downloader
+
+WORKDIR /build
+RUN apk add -U --no-cache curl gnupg tar
+
+RUN mkdir -p /build/lib
+
+ARG APACHE_DIST_FLINK=https://dist.apache.org/repos/dist/release/flink
+ARG FLINK_CDC=3.5.0
+ARG MYSQL_JDBC=9.4.0
+ARG POSTGRES_JDBC=42.7.8
+ARG MAVEN_URL=https://repo1.maven.org/maven2
+ARG FLUSS_VERSION=0.7.0
+ARG FLINK_VERSION=1.20
+ARG HADOOP_VERSION=2.8.3
+ARG PAIMON_VERSION=1.1.1
+ARG HIVE_VERSION=3.1
+
+# Download and extract flink-cdc
+RUN set -eux; \
+    curl -LO "${APACHE_DIST_FLINK}/flink-cdc-${FLINK_CDC}/flink-cdc-${FLINK_CDC}-bin.tar.gz"; \
+    tar -xf  "flink-cdc-${FLINK_CDC}-bin.tar.gz" --no-same-owner; \
+    mv       "flink-cdc-${FLINK_CDC}/lib/flink-cdc-dist-${FLINK_CDC}.jar" /build/lib/
+
+# Download jar files for pipeline connector
+RUN set -eux; \
+    cd /build/lib; \
+    curl -LO "${MAVEN_URL}/org/apache/flink/flink-cdc-pipeline-connector-mysql/${FLINK_CDC}/flink-cdc-pipeline-connector-mysql-${FLINK_CDC}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/flink/flink-cdc-pipeline-connector-postgres/${FLINK_CDC}/flink-cdc-pipeline-connector-postgres-${FLINK_CDC}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/flink/flink-cdc-pipeline-connector-fluss/${FLINK_CDC}/flink-cdc-pipeline-connector-fluss-${FLINK_CDC}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/flink/flink-cdc-pipeline-connector-paimon/${FLINK_CDC}/flink-cdc-pipeline-connector-paimon-${FLINK_CDC}.jar"; \
+    curl -LO "${MAVEN_URL}/com/mysql/mysql-connector-j/${MYSQL_JDBC}/mysql-connector-j-${MYSQL_JDBC}.jar"; \
+    curl -LO "${MAVEN_URL}/org/postgresql/postgresql/${POSTGRES_JDBC}/postgresql-${POSTGRES_JDBC}.jar"; \
+    curl -LO "${MAVEN_URL}/com/alibaba/fluss/fluss-flink-tiering/${FLUSS_VERSION}/fluss-flink-tiering-${FLUSS_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/com/alibaba/fluss/fluss-flink-${FLINK_VERSION}/${FLUSS_VERSION}/fluss-flink-${FLINK_VERSION}-${FLUSS_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/com/alibaba/fluss/fluss-fs-s3/${FLUSS_VERSION}/fluss-fs-s3-${FLUSS_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/com/alibaba/fluss/fluss-lake-paimon/${FLUSS_VERSION}/fluss-lake-paimon-${FLUSS_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/flink/flink-shaded-hadoop-2-uber/${HADOOP_VERSION}-10.0/flink-shaded-hadoop-2-uber-${HADOOP_VERSION}-10.0.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/paimon/paimon-s3/${PAIMON_VERSION}/paimon-s3-${PAIMON_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/paimon/paimon-hive-connector-${HIVE_VERSION}/${PAIMON_VERSION}/paimon-hive-connector-${HIVE_VERSION}-${PAIMON_VERSION}.jar"; \
+    curl -LO "${MAVEN_URL}/org/apache/paimon/paimon-flink-${FLINK_VERSION}/${PAIMON_VERSION}/paimon-flink-${FLINK_VERSION}-${PAIMON_VERSION}.jar"
+
+
+FROM flink:1.20.0-scala_2.12-java17
+LABEL maintainer="Teko's DataOps Team <dataops@teko.vn>"
+
+ENV FLINK_HOME=/opt/flink
+
+COPY --link --from=downloader /build/lib/  ${FLINK_HOME}/lib/
+
+USER flink
