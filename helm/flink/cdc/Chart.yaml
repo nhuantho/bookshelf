@@ -1,0 +1,11 @@
+apiVersion: v2
+name: flink-cdc
+description: flink-cdc helm chart
+icon: https://flink.apache.org/img/logo/svg/color_black.svg
+type: application
+version: 0.1.0
+appVersion: 3.5.0
+# kubeVersion: ^1.15
+maintainers:
+- name: Nhuan Bui
+  email: nhuanbc.b19cn488@gmail.com

@@ -1,0 +1,50 @@
+image:
+  registry: ghcr.io
+  repository: nhuantho/docker/flink/flink-cdc
+  tag: 3.5.0-flink-1.20.0-251027
+  pullPolicy: IfNotPresent
+
+jobManager:
+  replicas: 1
+  resource:
+    cpu: 1
+    memory: 1024m
+
+taskManager:
+  resource:
+    cpu: 1
+    memory: 1024m
+
+pipelineConfig:
+  source:
+    type: mysql
+    name: source
+    hostname: localhost
+    port: 3306
+    username: root
+    password: 123456
+    tables: app_db.\.*
+    server-id: 5400-5404
+    server-time-zone: UTC
+
+  sink:
+    type: doris
+    name: sink
+    fenodes: 127.0.0.1:8030
+    username: root
+    password: ""
+  
+  pipeline: 
+    name: Postgres to Fluss Pipeline
+    parallelism: 4
+
+configuration:
+  flinkVersion: v1_20
+  flink:
+    classloader.resolve-order: parent-first
+    state.checkpoints.dir: 'file:///tmp/checkpoints'
+    state.savepoints.dir: 'file:///tmp/savepoints'
+  flinkCdc:
+    parallelism: 4
+    schema.change.behavior: EVOLVE 
+  

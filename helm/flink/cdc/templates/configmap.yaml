@@ -1,0 +1,18 @@
+apiVersion: v1
+data:
+  flink-cdc.yaml: |-
+    {{ .Values.configuration.flinkCdc | toYaml | nindent 4 }}
+  pipeline.yaml: |-
+    source:
+      {{ .Values.pipelineConfig.source | toYaml | nindent 6 }}
+    
+    sink:
+      {{ .Values.pipelineConfig.sink | toYaml | nindent 6 }}
+    
+    pipeline:
+      name: {{ include "app.name" . }}-pipeline
+      parallelism: {{ .Values.pipelineConfig.pipeline.parallelism }}
+    
+kind: ConfigMap
+metadata:
+  name: {{ include "app.name" . }}-configmap

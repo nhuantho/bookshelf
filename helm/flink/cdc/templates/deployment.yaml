@@ -1,0 +1,42 @@
+apiVersion: flink.apache.org/v1beta1
+kind: FlinkDeployment
+metadata:
+  name: {{ include "app.name" . }}-job
+spec:
+  flinkConfiguration:
+    {{ .Values.configuration.flink | toYaml | nindent 4 }}
+  flinkVersion: {{ .Values.configuration.flinkVersion }}
+  image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  job:
+    args:
+      - '--use-mini-cluster'
+      - /opt/flink/flink-cdc-3.5.0/conf/pipeline.yaml
+    entryClass: org.apache.flink.cdc.cli.CliFrontend
+    jarURI: 'local:///opt/flink/lib/flink-cdc-dist-3.5.0.jar'
+    parallelism: 1
+    state: running
+    upgradeMode: savepoint
+  jobManager:
+    replicas: {{ .Values.jobManager.replicas }}
+    resource: 
+      {{ .Values.jobManager.resource | toYaml | nindent 6 }}
+  podTemplate:
+    apiVersion: v1
+    kind: Pod
+    spec:
+      containers:
+        # don't modify this name
+        - name: flink-main-container
+          volumeMounts:
+            - mountPath: /opt/flink/flink-cdc-3.5.0/conf
+              name: {{ include "app.name" . }}-config
+      volumes:
+        - configMap:
+            name: {{ include "app.name" . }}-configmap
+          name: {{ include "app.name" . }}-config
+  restartNonce: 0
+  serviceAccount: flink
+  taskManager:
+    resource:
+      {{ .Values.taskManager.resource | toYaml | nindent 6 }}
