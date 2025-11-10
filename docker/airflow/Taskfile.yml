@@ -1,0 +1,11 @@
+version: '3'
+
+vars:
+  AIRFLOW_VERSION: '3.0.0'
+  PYTHON_VERSION: '3.12'
+  AIRFLOW_UID: 50000
+  IMAGE: registry.tekoapis.com/dataops/airflow:{{.AIRFLOW_VERSION}}-python{{.PYTHON_VERSION}}-dbt1.9
+  BUILD_ARGS: --build-arg AIRFLOW_VERSION={{.AIRFLOW_VERSION}} --build-arg PYTHON_VERSION={{.PYTHON_VERSION}} --build-arg AIRFLOW_UID={{.AIRFLOW_UID}}
+
+includes:
+  docker: ../

@@ -1,0 +1,6 @@
+# External requirements consists of the custom packages that could be incompatible with Airflow
+astronomer-cosmos==1.10.0
+dbt-starrocks==1.9.0
+dbt-trino==1.9.1
+dbt-core==1.9.4
+dag-factory==0.23.0a3
