@@ -1,0 +1,21 @@
+################################################################################
+# Description: Sync MySQL all tables to Fluss
+################################################################################
+source:
+  type: mysql
+  hostname: mysql
+  port: 3306
+  username: root
+  password: 123456
+  tables: app_db.\.*
+  server-id: 5400-5404
+  server-time-zone: UTC
+
+sink:
+  type: fluss
+  name: Fluss Sink
+  bootstrap.servers: coordinator-server:9123
+
+pipeline:
+  name: Sync MySQL Database to FLuss
+  parallelism: 2
