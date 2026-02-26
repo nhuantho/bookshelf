@@ -16,7 +16,7 @@
 
 x-image:
    &image
-   image: ${OZONE_IMAGE:-apache/ozone}:${OZONE_IMAGE_VERSION:-2.1.0}${OZONE_IMAGE_FLAVOR:-}
+   image: ghcr.io/nhuantho/docker/ozone:2.1.0
 
 x-common-config:
    &common-config
@@ -49,8 +49,6 @@ services:
          - 9874:9874
       environment:
          <<: *common-config
-         CORE-SITE.XML_hadoop.proxyuser.hadoop.hosts: "*"
-         CORE-SITE.XML_hadoop.proxyuser.hadoop.groups: "*"
          ENSURE_OM_INITIALIZED: /data/metadata/om/current/VERSION
          WAITFOR: scm:9876
       command: ["ozone","om"]
@@ -64,6 +62,8 @@ services:
          <<: *common-config
          ENSURE_SCM_INITIALIZED: /data/metadata/scm/current/VERSION
       command: ["ozone","scm"]
+      volumes:
+         - ozone_scm:/var/lib/ozone_scm
    recon:
       <<: *image
       ports:
@@ -71,6 +71,8 @@ services:
       environment:
          <<: *common-config
       command: ["ozone","recon"]
+      volumes:
+         - ozone_recon:/var/lib/ozone_recon
    s3g:
       <<: *image
       ports:
@@ -78,18 +80,25 @@ services:
       environment:
          <<: *common-config
       command: ["ozone","s3g"]
+      volumes:
+         - ozone_s3g:/var/lib/ozone_s3g
    httpfs:
       <<: *image
       ports:
          - 14000:14000
       environment:
          <<: *common-config
-         CORE-SITE.XML_fs.defaultFS: "ofs://om"
       command: [ "ozone","httpfs" ]
+      volumes:
+         - ozone_s3g:/var/lib/ozone_httpfs
 
 volumes:
    ozone_om:
    ozone_dn:
+   ozone_recon:
+   ozone_scm:
+   ozone_s3g:
+   ozone_httpfs:
 
 networks:
   default:
