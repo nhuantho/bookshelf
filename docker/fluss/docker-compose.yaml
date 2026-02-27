@@ -60,6 +60,7 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
         rest.address: jobmanager
+  #end
   # mysql
   mysql:
     image: debezium/example-mysql:1.1
@@ -71,6 +72,11 @@ services:
       - MYSQL_PASSWORD=mysqlpw
     volumes:
       - mysql_data:/var/lib/mysql
+  #end
+
 volumes:
   mysql_data:
-  #end
+
+networks:
+  default:
+    name: bookshelf
