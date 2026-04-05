@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: airbyte
+      POSTGRES_PASSWORD: airbyte
+      POSTGRES_DB: airbyte
+    ports:
+      - "5432:5432"
+
+  temporal:
+    image: temporalio/auto-setup:1.22
+    depends_on:
+      - postgres
+    environment:
+      DB: postgresql
+      DB_PORT: 5432
+      POSTGRES_USER: airbyte
+      POSTGRES_PWD: airbyte
+      POSTGRES_SEEDS: postgres
+    ports:
+      - "7233:7233"
+
+  airbyte-server:
+    image: airbyte/server:1.1.0
+    depends_on:
+      - postgres
+      - temporal
+    ports:
+      - "8000:8001"
+    environment:
+      DATABASE_USER: airbyte
+      DATABASE_PASSWORD: airbyte
+      DATABASE_URL: jdbc:postgresql://postgres:5432/airbyte
+      TEMPORAL_ADDRESS: temporal:7233
+      WORKSPACE_ROOT: /data
+    volumes:
+      - airbyte-data:/data
+
+  airbyte-worker:
+    image: airbyte/worker:1.1.0
+    depends_on:
+      - airbyte-server
+    environment:
+      DATABASE_USER: airbyte
+      DATABASE_PASSWORD: airbyte
+      DATABASE_URL: jdbc:postgresql://postgres:5432/airbyte
+      TEMPORAL_ADDRESS: temporal:7233
+      WORKSPACE_ROOT: /data
+    volumes:
+      - airbyte-data:/data
+
+volumes:
+  airbyte-data:

@@ -1,0 +1,29 @@
+services:
+  metastore-standalone:
+    image: ghcr.io/nhuantho/docker/apache/hive:4.2.0-20260226
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=SuperSecr3t
+
+  hiveserver2-standalone:
+    image: ghcr.io/nhuantho/docker/apache/hive:4.2.0-20260226
+    depends_on:
+      - metastore-standalone
+    environment:
+      SERVICE_NAME: hiveserver2
+      IS_RESUME: true
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/postgres
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=SuperSecr3t
+        -Dhive.metastore.uris=thrift://metastore-standalone:9083
+
+networks:
+  default:
+    name: bookshelf

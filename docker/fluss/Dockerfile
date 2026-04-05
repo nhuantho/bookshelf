@@ -1,19 +1,11 @@
-FROM alpine:3.18 AS downloader
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 
-WORKDIR /build
-RUN apk add -U curl gnupg tar
+WORKDIR /app/
 
-RUN set -eux; \
-    curl -LO https://dlcdn.apache.org/flink/flink-cdc-3.5.0/flink-cdc-3.5.0-bin.tar.gz;
+COPY pom.xml ./
 
-RUN tar -xf  "flink-cdc-3.5.0-bin.tar.gz" --no-same-owner; \
-    mv       "flink-cdc-3.5.0" "flink-cdc";
+RUN mvn -f pom.xml dependency:resolve dependency:copy-dependencies -DoutputDirectory=/app/lib/
 
-RUN set -eux; cd "./flink-cdc/lib"; \
-    curl -LO https://repo1.maven.org/maven2/org/apache/flink/flink-cdc-pipeline-connector-mysql/3.5.0/flink-cdc-pipeline-connector-mysql-3.5.0.jar; \
-    curl -LO https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.27/mysql-connector-java-8.0.27.jar;
+FROM apache/fluss:0.8.0-incubating
 
-FROM apache/fluss-quickstart-flink:1.20-0.8.0-incubating
-
-COPY --link --from=downloader /build/flink-cdc/   /opt/flink/
-COPY ./jars /opt/flink/lib
+COPY --link --from=builder    /app/lib/     /opt/fluss/lib/

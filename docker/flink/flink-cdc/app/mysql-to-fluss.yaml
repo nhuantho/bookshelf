@@ -15,6 +15,9 @@ sink:
   type: fluss
   name: Fluss Sink
   bootstrap.servers: coordinator-server:9123
+#  properties.table.datalake.enabled: "true"
+#  properties.table.datalake.format: "paimon"
+#  properties.table.datalake.freshness: "30s"
 
 pipeline:
   name: Sync MySQL Database to FLuss

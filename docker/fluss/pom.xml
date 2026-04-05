@@ -1,0 +1,37 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.tekodata</groupId>
+    <artifactId>lakehouse</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.0</version>
+
+    <properties>
+        <fluss.version>0.8.0-incubating</fluss.version>
+        <hadoop.version>3.4.0</hadoop.version>
+    </properties>
+
+    <dependencies>
+        <!--https://mvnrepository.com/artifact/org.apache.fluss/fluss-lake-paimon -->
+        <dependency>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-lake-paimon</artifactId>
+            <version>${fluss.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.fluss/fluss-fs-s3 -->
+        <dependency>
+            <groupId>org.apache.fluss</groupId>
+            <artifactId>fluss-fs-s3</artifactId>
+            <version>${fluss.version}</version>
+        </dependency>
+        <!-- Maven dependency for hadoop-client -->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs-client</artifactId>
+            <version>${hadoop.version}</version>
+            <!-- Ensure the scope is not 'provided' if it needs to be bundled -->
+        </dependency>
+    </dependencies>
+</project>

@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  IMAGE: ghcr.io/nhuantho/docker/fluss/flink/fink-cdc:3.5.0-1.20-0.8.0-incubating
+  IMAGE: ghcr.io/nhuantho/docker/apache/fluss:0.8.0-incubating-20260301-0
 
 includes:
   docker: ../

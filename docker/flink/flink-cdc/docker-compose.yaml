@@ -1,0 +1,57 @@
+services:
+  #begin Flink cluster
+  jobmanager:
+    image: ghcr.io/nhuantho/docker/apache/fluss/flink/fink-cdc:3.5.0-1.20-0.8.0-incubating-20260227
+    ports:
+      - "8083:8081"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+    volumes:
+      - ./app/:/app/flink-cdc/
+  taskmanager:
+    image: ghcr.io/nhuantho/docker/apache/fluss/flink/fink-cdc:3.5.0-1.20-0.8.0-incubating-20260227
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 10
+        taskmanager.memory.process.size: 2048m
+        taskmanager.memory.framework.off-heap.size: 256m
+    volumes:
+      - ./app/:/app/flink-cdc/
+  sql-client:
+    image: ghcr.io/nhuantho/docker/apache/fluss/flink/fink-cdc:3.5.0-1.20-0.8.0-incubating-20260227
+    command: ./sql-client
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
+  #end
+  # mysql
+  mysql:
+    image: debezium/example-mysql:1.1
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=mysqluser
+      - MYSQL_PASSWORD=mysqlpw
+    volumes:
+      - mysql_data:/var/lib/mysql
+  #end
+
+volumes:
+  mysql_data:
+
+networks:
+  default:
+    name: bookshelf
