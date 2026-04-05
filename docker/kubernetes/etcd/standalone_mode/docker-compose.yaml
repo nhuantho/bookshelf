@@ -1,0 +1,22 @@
+services:
+  etcd0:
+    image: quay.io/coreos/etcd:v3.6.10-amd64
+    ports:
+      - 4001:4001
+      - 2380:2380
+      - 2379:2379
+    volumes:
+      - /usr/share/ca-certificates/:/etc/ssl/certs
+      - etcd0-data:/etcd-data
+    environment:
+      ETCD_NAME: etcd0
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd0:2379,http://etcd0:4001
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379,http://0.0.0.0:4001
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd0:2380
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER_TOKEN: etcd-cluster-1
+      ETCD_INITIAL_CLUSTER: etcd0=http://etcd0:2380
+      ETCD_INITIAL_CLUSTER_STATE: new
+
+volumes:
+  etcd0-data:
